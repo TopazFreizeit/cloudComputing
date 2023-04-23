@@ -30,7 +30,7 @@ export class InfraStack extends cdk.Stack {
 
     webserverSG.addIngressRule(
       ec2.Peer.anyIpv4(),
-      ec2.Port.tcp(5000),
+      ec2.Port.tcp(80),
       "allow HTTP traffic from anywhere"
     );
 
@@ -38,8 +38,8 @@ export class InfraStack extends cdk.Stack {
     const bucket = new s3.Bucket(this, "MyBucket", {
       removalPolicy: cdk.RemovalPolicy.DESTROY, // This will force CloudFormation to delete the bucket even if it's not empty
     });
-    
-    var srcPath = path.join(`${__dirname}`, '..', '..','src');
+
+    var srcPath = path.join(`${__dirname}`, "..", "..", "src");
     new s3deploy.BucketDeployment(this, "MyBucketDeployment", {
       sources: [s3deploy.Source.asset(srcPath)],
       destinationBucket: bucket,
@@ -90,7 +90,7 @@ export class InfraStack extends cdk.Stack {
     ec2Instance.addUserData("yum update -y");
     ec2Instance.addUserData("yum install -y python3");
     ec2Instance.addUserData("yum install -y python3-pip");
-    ec2Instance.addUserData("pip3 install flask boto3 pillow");
+    ec2Instance.addUserData('pip3 install "uvicorn[standard]" fastapi');
 
     // Add Flask app
     ec2Instance.addUserData(
@@ -100,7 +100,7 @@ export class InfraStack extends cdk.Stack {
     // Run Flask app
     ec2Instance.addUserData("cd /home/ec2-user/src");
     ec2Instance.addUserData("export FLASK_APP=/home/ec2-user/src/lpr.py");
-    ec2Instance.addUserData("python3 -m flask run --host=0.0.0.0");
+    ec2Instance.addUserData("uvicorn main:app --host 0.0.0.0 --port 80");
 
     new cdk.CfnOutput(this, "InstancePublicIp", {
       value: ec2Instance.instancePublicIp,

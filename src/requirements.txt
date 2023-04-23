@@ -1,4 +1,0 @@
-"uvicorn[standard]"
-fastapi
-boto3
-pillow

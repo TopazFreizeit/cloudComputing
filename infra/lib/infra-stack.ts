@@ -4,6 +4,8 @@ import { Construct } from "constructs";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
+import * as path from "path";
+
 import {
   Role,
   PolicyStatement,
@@ -36,9 +38,10 @@ export class InfraStack extends cdk.Stack {
     const bucket = new s3.Bucket(this, "MyBucket", {
       removalPolicy: cdk.RemovalPolicy.DESTROY, // This will force CloudFormation to delete the bucket even if it's not empty
     });
-
+    
+    var srcPath = path.join(`${__dirname}`, '..', '..','src');
     new s3deploy.BucketDeployment(this, "MyBucketDeployment", {
-      sources: [s3deploy.Source.asset(`${__dirname}/../../src`)],
+      sources: [s3deploy.Source.asset(srcPath)],
       destinationBucket: bucket,
       destinationKeyPrefix: "src/",
     });

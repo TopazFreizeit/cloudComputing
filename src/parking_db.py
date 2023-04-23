@@ -17,7 +17,8 @@ class DatabaseCreator:
             CREATE TABLE IF NOT EXISTS {self.table_name} (
                 id TEXT PRIMARY KEY,
                 enty_hour TEXT NOT NULL,
-                parking_lot TEXT NOT NULL
+                parking_lot TEXT NOT NULL,
+                plate TEXT NOT NULL
             )
         ''')
         
@@ -26,7 +27,7 @@ class DatabaseCreator:
         conn.commit()
         conn.close()
         
-    def entry(self, date:str, guid:str, parking_lot:str):
+    def entry(self, date:str, guid:str, parking_lot:str, plate:str):
         conn = sqlite3.connect(self.db_name)
         c = conn.cursor()
         
@@ -42,26 +43,24 @@ class DatabaseCreator:
         
         # Insert guid
         print('trying to insert',guid,date,parking_lot)
-        c.execute(f"INSERT INTO {self.table_name} (id, enty_hour, parking_lot) VALUES (?, ?, ?)", (guid, f"{date}", parking_lot))
+        c.execute(f"INSERT INTO {self.table_name} (id, enty_hour, parking_lot, plate) VALUES (?, ?, ?, ?)", (guid, f"{date}", parking_lot, plate))
         conn.commit()
         # Close the connection
         conn.close()
         return True
     
-    def exit(self, date:str, guid:str):
+    def exit(self, guid:str):
         conn = sqlite3.connect(self.db_name)
         c = conn.cursor()
         
         c.execute(f"SELECT id FROM {self.table_name} WHERE id = ?", (guid,))
         result = c.fetchone()
         print('checking if id ', guid, 'exist in db and the answer is ', result)
-        if result is not None:
-            return False
+        if result is None:
+            return None, None, None
         
-        # Insert guid
-        print('trying to insert',guid,date,parking_lot)
-        c.execute(f"INSERT INTO {self.table_name} (id, enty_hour, parking_lot) VALUES (?, ?, ?)", (guid, f"{date}", parking_lot))
-        conn.commit()
-        # Close the connection
-        conn.close()
-        return True
+        c.execute(f"SELECT plate,parking_lot,enty_hour FROM {self.table_name} WHERE id = ?", (guid,))
+        result = c.fetchone()
+        plate, parking_lot, entry_time = result
+
+        return plate, parking_lot, entry_time

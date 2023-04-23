@@ -14,13 +14,22 @@ class parkingService():
         
         guid = str(uuid.uuid4())
         date = str(datetime.now())
-        result : bool = self.db.entry(date, guid, parking_lot)
+        result : bool = self.db.entry(date, guid, parking_lot, plate)
         
         # if already guid exist for different car
         while not result:
             guid = str(uuid.uuid4())
             date = str(datetime.now())
-            result : bool = self.db.entry(date, guid, parking_lot)
+            result : bool = self.db.entry(date, guid, parking_lot, plate)
         
         return  guid;
     
+    def exit(self, ticketId):
+        plate, parking_lot, entry_time = self.db.exit(ticketId)
+        #if plate is None throw error - needs to add?
+        date_time_entry_obj = datetime.strptime(entry_time, '%Y-%m-%d %H:%M:%S.%f')
+        parked_time = datetime.now() - date_time_entry_obj
+        parked_hours = parked_time.total_seconds() / 3600
+        charge = parked_hours * 10
+
+        return plate, parked_time, parking_lot, charge

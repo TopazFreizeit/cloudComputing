@@ -16,9 +16,9 @@ async def entry(plate: str = Query(..., description="Plate Number"),
     return {"ticket_id": guid}
 
 @app.post("/exit")
-async def exit(ticketId: int = Query(..., gt=0, description="Ticket Id parameter")):
-    """
-    Endpoint to create an item with two query parameters
-    """
+async def exit(ticketId: str = Query(..., description="Ticket Id parameter")):
+
+    plate, parked_time, parking_lot, charge = parkingService.exit(ticketId)
     # Your code to create the item using the two query parameters
-    return {"item_created": True}
+    #return {"item_created": True}
+    return {"plate": plate, "parkedTime": str(parked_time), "parkingLot": parking_lot, "charge": charge}

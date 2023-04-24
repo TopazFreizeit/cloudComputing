@@ -54,9 +54,6 @@ export class InfraStack extends cdk.Stack {
     role.addManagedPolicy(
       iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonS3FullAccess")
     );
-    role.addManagedPolicy(
-      iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonRekognitionFullAccess")
-    );
 
     // Add a policy to the S3 bucket to allow access from the instance role
     bucket.addToResourcePolicy(

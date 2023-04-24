@@ -1,3 +1,5 @@
 venv/
 .DS_Store
 *.pyc
+src/*.db
+src/my_database.db

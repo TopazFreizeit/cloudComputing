@@ -17,5 +17,11 @@ aws configure set region $region_name
 aws configure set output $output_format
 
 echo "AWS configuration complete!"
-echo "Please go to the infra folder and run: cdk deploy"
-echo "After deploy complete you will get the public ip, but notice it might take some time for the ec2 to initilaize."
+
+cd infra
+npm install -g aws-cdk
+npm install
+cdk bootstrap
+cdk deploy 
+
+echo "After deploy complete you will get the public ip, but notice it will take some time for the ec2 to initilaize, so please wait 5 min."

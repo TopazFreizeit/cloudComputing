@@ -2,10 +2,14 @@
 
 - Hey, welcome to our HW1 assigment for cloud computing course! :)
 
-- You can run the **run.sh** file in the parent directory *or* follow the below instructions.
+- You can run the **run.bat** file (for Windows) or **run.sh** file (for mac) in the parent directory *or* follow the instructions below.
+
+- if you ran the script you'll see the public IP printed to the screen afte the deployment is finished.
+
+
 ## Instructions
 
-1. Please install nodejs in your compuer (node -v to confirm and check version)
+1. Please install nodejs on your computer (node -v to confirm and check version)
 2. Please install aws-cdk gloablly by typing "npm install -g aws-cdk"
 3. Please go to "infra" folder and install all project dependencies using "npm install"
 4. Please log in to your account

@@ -62,5 +62,6 @@ class DatabaseCreator:
         c.execute(f"SELECT plate,parking_lot,enty_hour FROM {self.table_name} WHERE id = ?", (guid,))
         result = c.fetchone()
         plate, parking_lot, entry_time = result
+        c.execute(f"DELETE FROM {self.table_name} WHERE id = ?", (guid,))
 
         return plate, parking_lot, entry_time

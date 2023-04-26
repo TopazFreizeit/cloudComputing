@@ -57,11 +57,13 @@ class DatabaseCreator:
         result = c.fetchone()
         print('checking if id ', guid, 'exist in db and the answer is ', result)
         if result is None:
-            return None, None, None
+            raise Exception("Record with id {} not found".format(guid))
         
         c.execute(f"SELECT plate,parking_lot,enty_hour FROM {self.table_name} WHERE id = ?", (guid,))
         result = c.fetchone()
         plate, parking_lot, entry_time = result
         c.execute(f"DELETE FROM {self.table_name} WHERE id = ?", (guid,))
-
+        
+        conn.commit()
+        conn.close()
         return plate, parking_lot, entry_time

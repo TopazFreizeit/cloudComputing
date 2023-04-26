@@ -19,6 +19,6 @@ async def entry(plate: str = Query(..., description="Plate Number"),
 async def exit(ticketId: str = Query(..., description="Ticket Id parameter")):
 
     plate, parked_time, parking_lot, charge = parkingService.exit(ticketId)
-    # Your code to create the item using the two query parameters
-    #return {"item_created": True}
+    if plate is None:
+        return {"message": "Record with ticketId {} not found".format(ticketId)}
     return {"plate": plate, "parkedTime": str(parked_time), "parkingLot": parking_lot, "charge": charge}

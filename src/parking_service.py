@@ -25,8 +25,12 @@ class parkingService():
         return  guid;
     
     def exit(self, ticketId):
-        plate, parking_lot, entry_time = self.db.exit(ticketId)
-        #if plate is None throw error - needs to add?
+        try:
+            plate, parking_lot, entry_time = self.db.exit(ticketId)
+        except Exception as e:
+            print("Error: {}".format(str(e)))
+            return None, None, None, None
+        
         date_time_entry_obj = datetime.strptime(entry_time, '%Y-%m-%d %H:%M:%S.%f')
         parked_time = datetime.now() - date_time_entry_obj
         parked_hours = parked_time.total_seconds() / 3600

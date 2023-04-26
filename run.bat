@@ -1,17 +1,17 @@
-@echo off
-echo "Welcome to the AWS configuration script!"
-echo "Please provide the following details:"
-
-set /p AWS_ACOUNT_ID="Enter AWS account id:"
-set /p AWS_ACCESS_KEY_ID="Enter AWS acces key:"
-set /p AWS_SECRET_ACCESS_KEY="Enter AWS secret access key:"
-set /p region_name="Default region name:"
-set /p output_format="Default output format [json]:":
-
-aws configure set aws_access_key_id "%AWS_ACCESS_KEY_ID%"
-aws configure set aws_secret_access_key "%AWS_SECRET_ACCESS_KEY%"
-aws configure set region "%region_name%"
-aws configure set output "%output_format%"
+@REM @echo off
+@REM echo "Welcome to the AWS configuration script!"
+@REM echo "Please provide the following details:"
+@REM 
+@REM set /p AWS_ACOUNT_ID="Enter AWS account id:"
+@REM set /p AWS_ACCESS_KEY_ID="Enter AWS acces key:"
+@REM set /p AWS_SECRET_ACCESS_KEY="Enter AWS secret access key:"
+@REM set /p region_name="Default region name:"
+@REM set /p output_format="Default output format [json]:":
+@REM 
+@REM aws configure set aws_access_key_id "%AWS_ACCESS_KEY_ID%"
+@REM aws configure set aws_secret_access_key "%AWS_SECRET_ACCESS_KEY%"
+@REM aws configure set region "%region_name%"
+@REM aws configure set output "%output_format%"
 
 echo "AWS configuration complete!"
 

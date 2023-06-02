@@ -1,11 +1,10 @@
-# Cloud Computing HW1 (Parking Lot)
+# Cloud Computing HW2
 
-- Hey, welcome to our HW1 assigment for cloud computing course! :)
+- Hey, welcome to our HW2 assigment for cloud computing course! :)
 
-- You can run the **run.bat** file (for Windows) or **run.sh** file (for mac) in the parent directory *or* follow the instructions below.
+- You can run the **run.bat** file (for Windows) or **run.sh** file (for mac) in the parent directory _or_ follow the instructions below.
 
 - if you ran the script you'll see the public IP printed to the screen afte the deployment is finished.
-
 
 ## Instructions
 
@@ -25,4 +24,4 @@
 
 1. All infrastructure will be deployed in us-east-1 region.
 2. We used fastapi as the framework.
-2. Please read the CDK documentation for typescript if needed - https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html
+3. Please read the CDK documentation for typescript if needed - https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html

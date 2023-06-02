@@ -1,8 +1,11 @@
+from task import Task
+
+
 class TaskManager:
     def __init__(self):
-        self.tasks : list[tuple[str,bytes,int]] = []
+        self.tasks : list[Task] = []
         self.workers : dict[str, bool] = {}
-        self.task_results = []
+        self.task_results: list[tuple[str,bytes]] = []
 
     def add_task(self, task):
         self.tasks.append(task)
@@ -22,7 +25,7 @@ class TaskManager:
     def get_workers(self):
         return self.workers
 
-    def update_worker_state(self, worker, state):
+    def update_worker_state(self, worker: str, state: bool):
         self.workers[worker] = state
 
     def add_task_result(self, result):
@@ -32,4 +35,14 @@ class TaskManager:
         return self.task_results
     
     def find_worker_node(self):
-        self.task_results
+        for key,value in self.workers.items():
+            if value == False:
+                return key
+        return None
+    
+    def doTask(self):
+        worker = self.find_worker_node()
+        if worker == None:
+            #worker = new worker
+            return True
+        #send http post to worker

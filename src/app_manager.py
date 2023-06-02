@@ -1,6 +1,8 @@
 from fastapi import Body, FastAPI, Query
 import uuid
 
+from pydantic import BaseModel
+
 from manager.manager import TaskManager
 
 app = FastAPI()
@@ -17,4 +19,15 @@ def enqueue(iterations: int = Query(..., description="number of iterations", gt=
 
 @app.post("/pullCompleted")
 async def exit(top: str = Query(..., description="number of getting the completed tasks")):
-    return {"plate": plate, "parkedTime": str(parked_time), "parkingLot": parking_lot, "charge": charge}
+    return manager.get_task_results()[:top]
+
+
+class WorkerStatusModel(BaseModel):
+    worker_id: str
+    status: bool
+
+@app.post("/worker-status")
+def process_data(request_data: WorkerStatusModel):
+    worker_id = request_data.worker_id
+    status = request_data.status
+    manager.update_worker_state(worker_id, status)

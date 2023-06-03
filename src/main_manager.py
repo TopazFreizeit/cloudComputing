@@ -10,26 +10,36 @@ import configuration
 from task_result import TaskResult
 import custom_logger
 import time
-
+import boto3
 app = FastAPI()
 
+my_num = os.getenv('MY_NUM')
+# Specify the instance name you want to get the IP address for
+if(my_num ==1):
+    instance_name = 'InfraStack/ec2-instance-2'
+else:
+    instance_name = 'InfraStack/ec2-instance-1'
+
+# Retrieve all instances
+client = boto3.client('ec2','us-east-1')
+response = client.describe_instances()
+
+# Iterate over reservations and instances to find the matching instance
+for reservation in response['Reservations']:
+    for instance in reservation['Instances']:
+        # Check if the instance has a Name tag and it matches the specified instance name
+        if 'Tags' in instance:
+            for tag in instance['Tags']:
+                if tag['Key'] == 'Name' and tag['Value'] == instance_name:
+                    # Retrieve the IP address of the matching instance
+                    other_manager_ip = instance['PublicIpAddress'].split()[2]
+                    logging.info(f"IP address of other manager:{other_manager_ip}")
+                    break
 response = requests.get('https://api.ipify.org?format=json')
 my_ip = response.json()['ip']
-other_manager_ip = os.getenv('OTHER_MANAGER_IP')
+#other_manager_ip = os.getenv('OTHER_MANAGER_IP')
 
 logging.info(f"manager node just started with my ip of {my_ip} and other managaer ip of {other_manager_ip}")
-
-if other_manager_ip is not None:
-    logging.info(f"other manager ip of {other_manager_ip}")
-    url = f'http://{other_manager_ip}//give-other-manager-ip/{my_ip}'
-    response = requests.get(url=url)
-    while response.status_code != 200:
-        response = requests.get(url=url)
-        
-while other_manager_ip is None:
-    logging.warn("Dont have other manager ip!")
-    time.sleep(60)
-    other_manager_ip = os.getenv('OTHER_MANAGER_IP')
 
 manager = Manager(other_manager_ip=other_manager_ip, my_ip=my_ip)
 manager_main_flow= threading.Thread(target=manager.start_main_flow)
@@ -68,9 +78,3 @@ def remove_worker(request: Request):
         manager.remove_worker_node(worker_ip)
     else:
         logging.error(f'could not get the ip from the request of the worker node')
-
-@app.get("/give-other-manager-ip/{other_manager_ip}")
-def update_other_manager_ip(other_manager_ip: str):
-    logging.info(f"just got a ip of a different manager and it is {other_manager_ip}")
-    os.environ['OTHER_MANAGER_IP'] = other_manager_ip
-    return "OK"

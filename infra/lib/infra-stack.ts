@@ -77,12 +77,15 @@ export class InfraStack extends cdk.Stack {
     ec2Instance_1.addUserData("yum install -y git");
     ec2Instance_1.addUserData("yum install -y python3");
     ec2Instance_1.addUserData("yum install -y python3-pip");
-    ec2Instance_1.addUserData('pip3 install "uvicorn[standard]" fastapi');
+    ec2Instance_1.addUserData('pip3 install "uvicorn[standard]" fastapi boto3');
     ec2Instance_1.addUserData(
       "git clone https://github.com/TopazFreizeit/cloudComputing.git"
     );
     ec2Instance_1.addUserData("cd src");
     ec2Instance_1.addUserData("cd cd cloudComputing");
+    ec2Instance_1.addUserData(
+      `export MY_NUM=1`
+    );
     ec2Instance_1.addUserData(
       "uvicorn main_manager:app --host 0.0.0.0 --port 80"
     );
@@ -97,14 +100,14 @@ export class InfraStack extends cdk.Stack {
     ec2Instance_2.addUserData("yum install -y git");
     ec2Instance_2.addUserData("yum install -y python3");
     ec2Instance_2.addUserData("yum install -y python3-pip");
-    ec2Instance_2.addUserData('pip3 install "uvicorn[standard]" fastapi');
+    ec2Instance_2.addUserData('pip3 install "uvicorn[standard]" fastapi boto3');
     ec2Instance_2.addUserData(
       "git clone https://github.com/TopazFreizeit/cloudComputing.git"
     );
     ec2Instance_2.addUserData("cd src");
     ec2Instance_2.addUserData("cd cd cloudComputing");
     ec2Instance_2.addUserData(
-      `export OTHER_MANAGER_IP=${ec2Instance_1.instancePublicIp}`
+      `export MY_NUM=2`
     );
     ec2Instance_2.addUserData(
       "uvicorn main_manager:app --host 0.0.0.0 --port 80"

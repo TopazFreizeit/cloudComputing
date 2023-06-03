@@ -66,26 +66,6 @@ class Manager:
         return new_worker 
     
     def create_new_worker_node(self)->workerInsideManager:
-        iam_client = boto3.client('iam')
-        instance_profile_name = 'instance-profile-for-aws-ec2-full-access'
-        arn = None
-        try:
-            response = iam_client.get_instance_profile(
-                InstanceProfileName=instance_profile_name
-            )
-            instance_profile = response['InstanceProfile']
-            logging.info("Instance profile already exists.")
-            instance_profile_arn = instance_profile['Arn']
-            
-        except iam_client.exceptions.NoSuchEntityException:
-            logging.warn("Instance profile does not exist.")
-            instance_profile_name = 'your-instance-profile-name'
-            response_create_profile = iam_client.create_instance_profile(
-                InstanceProfileName=instance_profile_name
-            )
-
-            instance_profile_arn = response_create_profile['InstanceProfile']['Arn']
-            print("Instance Profile ARN:", instance_profile_arn)
         # Specify the user data script
         user_data = f'''
             #!/bin/bash
@@ -107,11 +87,7 @@ class Manager:
             SecurityGroups=['webserver-sg-number-one'],
             MinCount=1,
             MaxCount=1,
-            UserData=user_data,
-            IamInstanceProfile=
-            {
-                'Arn': f'arn:aws:iam::{account_id}:instance-profile/your-role-name'  # Replace with the ARN of your IAM role
-            },
+            UserData=user_data
         )
         instance = response[0]
         instance.wait_until_running() # Wait until the instance reaches the "running" state

@@ -1,4 +1,7 @@
-class Task:
+from pydantic import BaseModel
+
+
+class Task(BaseModel):
     
     def __init__(self):
         self.id :str

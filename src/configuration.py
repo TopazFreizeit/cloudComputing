@@ -17,5 +17,5 @@ if subnet_id is None:
 
 add_worker_endpoint='add-worker'
 start_new_work_endpoint='can-you-start-work'
-complete_task_endpoint='complete task'
-remove_work= 'remove work'
+complete_task_endpoint='complete-task'
+remove_worker_endpoint= 'remove-work'

@@ -6,6 +6,7 @@ import hashlib
 import threading
 import requests
 from task_result import TaskResult
+import logging
 
 class Worker:
     
@@ -14,7 +15,7 @@ class Worker:
         self.manager_ip_2:str=manager_ip_2
         self.work_id= 1
         self.busy:bool= False
-        self.finsh_time = 0 
+        self.last_work_time:float = 0 
     
     
     def work(self, task:Task):
@@ -22,37 +23,38 @@ class Worker:
         for i in range(task.iterations - 1):
             output = hashlib.sha512(output).digest()
         self.busy = False
-        self.finsh_time = time.time()
-        self.check_flag()
-        self.update_manager(task,output)
-    
-    def update_manager(self,task:Task, output):
-        # Create a TaskResult object
+        self.last_work_time = time.time()
         result = TaskResult(id=task.id, output=output)
-        # Convert TaskResult to JSON string
+        self.update_managers(result)
+    
+    def update_managers(self, result:TaskResult):
         result_json = json.dumps(result.__dict__)
-
+        headers = {
+            "Content-Type": "application/json"
+        }
         #update manager 1
         url_manager1_complete_task = f'http://{self.manager_ip_1}/{configuration.complete_task_endpoint}'
-        requests.post(url_manager1_complete_task,task_result =result_json)
-
+        requests.post(url=url_manager1_complete_task,data=result_json, headers=headers)
         #update manager 2
         url_manager2_complete_task= f'http://{self.manager_ip_2}/{configuration.complete_task_endpoint}'
-        requests.post(url_manager2_complete_task,task_result =result_json)
+        requests.post(url=url_manager2_complete_task,data=result_json, headers=headers)
     
     def start_new_work(self, task:Task):
         self.busy = True
         thread = threading.Thread(target=self.work, args=(task,))
         thread.start()
 
-    def check_flag(self):
+    def check_if_idle(self):
         while True:
+            time.sleep(60)
+            logging.info(f'checking if i am busy and it is {self.busy}')
             if not self.busy:
-                elapsed_time = time.time() - self.finsh_time
+                elapsed_time = time.time() - self.last_work_time
+                logging.info(f"elapsed time from last time i did a work is {elapsed_time}")
                 if elapsed_time >= 300:  # 5 minutes (300 seconds)
                     url_manager1 =  f'http://{self.manager_ip_2}/{configuration.remove_work}'
-                    requests(url_manager1,self.work_id)
+                    requests.get(url=url_manager1)
                     url_manager2 = f'http://{self.manager_ip_2}/{configuration.remove_work}'
-                    requests(url_manager2,self.work_id)
+                    requests.get(url=url_manager2)
     
     

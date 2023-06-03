@@ -46,4 +46,7 @@ def process_data(request_data: WorkerStatusModel):
 @app.post(f"/{configuration.complete_task_endpoint}")
 def complete_work(task_result: TaskResult):
     manager.add_task_result(task_result)
-    
+
+@app.post(f"/{configuration.remove_work}")
+def remove_work(work_id):
+    manager.remove_worker_node(work_id)

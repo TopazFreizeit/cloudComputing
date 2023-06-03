@@ -43,7 +43,6 @@ class Manager:
         return self.task_results
     
     
-    
     def ask_worker_node_to_process_new_task(self, worker_ip):
         ip = None
         url = f'http://{worker_ip}/{configuration.start_new_work_endpoint}'
@@ -84,6 +83,20 @@ class Manager:
         public_ip = instance.public_ip_address
         self.add_worker(public_ip)
         return public_ip
+    
+    def remove_worker_node(worker_instance_id):
+        # Create an EC2 client
+        ec2_client = boto3.client('ec2')
+
+        # Terminate the worker instance
+        response = ec2_client.terminate_instances(InstanceIds=[worker_instance_id])
+
+        # Check if termination was successful
+        if response['TerminatingInstances'][0]['InstanceId'] == worker_instance_id:
+            print(f"Worker instance {worker_instance_id} terminated successfully.")
+        else:
+            print(f"Failed to terminate worker instance {worker_instance_id}.")
+    
     
     def find_worker_node(self):
         ip = None

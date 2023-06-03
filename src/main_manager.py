@@ -2,17 +2,17 @@ import logging
 import os
 from fastapi import Body, FastAPI, Query, Request
 import uuid
-
 from pydantic import BaseModel
 import requests
 import threading
-
 from manager import Manager, workerInsideManager
 import configuration
 from task_result import TaskResult
+import custom_logger
 
 other_manager_ip = os.getenv('OTHER_MANAGER_IP')
 if other_manager_ip is None:
+    logging.error("Dont have other manager ip!")
     raise NotImplementedError("Dont have other manager ip!")
 
 response = requests.get('https://api.ipify.org?format=json')

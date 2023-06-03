@@ -10,7 +10,6 @@ from task_result import TaskResult
 from typing import Union
 import time
 from queue import Queue
-import concurrent.futures
 
 class workerInsideManager(BaseModel):
     def __init__(self, ip:str, instance_id:str):
@@ -72,6 +71,7 @@ class Manager:
         user_data = f'''
             #!/bin/bash
             yum update -y
+            yum install -y git
             yum install -y python3
             yum install -y python3-pip
             pip3 install "uvicorn[standard]" fastapi boto3
@@ -85,6 +85,7 @@ class Manager:
         response = self.ec2_client.create_instances(
             ImageId=configuration.ami_id,
             InstanceType=configuration.instance_type,
+            SecurityGroups=[configuration.security_group_id],
             MinCount=1,
             MaxCount=1,
             UserData=user_data

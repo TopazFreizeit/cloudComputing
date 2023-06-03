@@ -1,12 +1,12 @@
 import json
 import time
-from sklearn.setup import configuration
 from task import Task
 import hashlib
 import threading
 import requests
 from task_result import TaskResult
 import logging
+import configuration
 
 class Worker:
     

@@ -4,16 +4,20 @@ from task import Task
 from worker import Worker
 import configuration
 import threading
+import logging
+import custom_logger
 
 manager_ip_1 = os.getenv('MANAGER_NODE_IP_1')
 if manager_ip_1 is None:
+    logging.error("Dont have other manager ip 1!")
     raise NotImplementedError("Dont have other manager ip 1!")
 
 manager_ip_2 = os.getenv('MANAGER_NODE_IP_2')
 if manager_ip_2 is None:
+    logging.error("Dont have other manager ip 2!")
     raise NotImplementedError("Dont have other manager ip 2!")
 
-worker = Worker(manager_ip_1,manager_ip_2)
+worker = Worker(manager_ip_1, manager_ip_2)
 
 check_worker_is_idle = threading.Thread(target=worker.check_if_idle)
 

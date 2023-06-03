@@ -9,16 +9,27 @@ from manager import Manager, workerInsideManager
 import configuration
 from task_result import TaskResult
 import custom_logger
+import time
 
-other_manager_ip = os.getenv('OTHER_MANAGER_IP')
-if other_manager_ip is None:
-    logging.error("Dont have other manager ip!")
-    raise NotImplementedError("Dont have other manager ip!")
+app = FastAPI()
 
 response = requests.get('https://api.ipify.org?format=json')
 my_ip = response.json()['ip']
+other_manager_ip = os.getenv('OTHER_MANAGER_IP')
 
-app = FastAPI()
+logging.info(f"manager node just started with my ip of {my_ip} and other managaer ip of {other_manager_ip}")
+
+if other_manager_ip is not None:
+    logging.info(f"other manager ip of {other_manager_ip}")
+    url = f'http://{other_manager_ip}//give-other-manager-ip/{my_ip}'
+    response = requests.get(url=url)
+    while response.status_code != 200:
+        response = requests.get(url=url)
+        
+while other_manager_ip is None:
+    logging.warn("Dont have other manager ip!")
+    time.sleep(60)
+    other_manager_ip = os.getenv('OTHER_MANAGER_IP')
 
 manager = Manager(other_manager_ip=other_manager_ip, my_ip=my_ip)
 manager_main_flow= threading.Thread(target=manager.start_main_flow)
@@ -57,3 +68,9 @@ def remove_worker(request: Request):
         manager.remove_worker_node(worker_ip)
     else:
         logging.error(f'could not get the ip from the request of the worker node')
+
+@app.get("/give-other-manager-ip/{other_manager_ip}")
+def update_other_manager_ip(other_manager_ip: str):
+    logging.info(f"just got a ip of a different manager and it is {other_manager_ip}")
+    os.environ['OTHER_MANAGER_IP'] = other_manager_ip
+    return "OK"

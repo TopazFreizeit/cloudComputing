@@ -3,7 +3,7 @@ echo "Please provide the following details:"
 
 read -p "AWS Access Key ID: " access_key
 read -p "AWS Secret Access Key: " secret_key
-read -p "Default region name: " region_name
+region_name="us-east-1"
 read -p "Default output format [json]: " output_format
 
 # Set default output format to JSON if user doesn't provide anything

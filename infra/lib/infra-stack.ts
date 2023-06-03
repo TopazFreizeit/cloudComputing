@@ -84,9 +84,6 @@ export class InfraStack extends cdk.Stack {
     ec2Instance_1.addUserData("cd src");
     ec2Instance_1.addUserData("cd cd cloudComputing");
     ec2Instance_1.addUserData(
-      `export OTHER_MANAGER_IP=${ec2Instance_2.instancePublicIp}`
-    );
-    ec2Instance_1.addUserData(
       "uvicorn main_manager:app --host 0.0.0.0 --port 80"
     );
 

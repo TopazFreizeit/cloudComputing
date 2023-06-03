@@ -1,8 +1,0 @@
-2023-06-03 19:02:39,682 - INFO - This is a log message
-2023-06-03 19:02:39,683 - WARNING - This is a warning message
-2023-06-03 19:02:39,683 - ERROR - Dont have other manager ip 1!
-2023-06-03 19:03:10,978 - ERROR - Dont have other manager ip 1!
-2023-06-03 19:18:07,710 - ERROR - Dont have other manager ip 1!
-2023-06-03 20:51:32,664 - ERROR - Dont have other manager ip 1!
-2023-06-03 20:54:08,121 - INFO - manager node just started with my ip of 46.117.244.145 and other managaer ip of None
-2023-06-03 20:54:08,121 - WARNING - Dont have other manager ip!

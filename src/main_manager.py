@@ -23,7 +23,7 @@ else:
 # Retrieve all instances
 client = boto3.client('ec2','us-east-1')
 response = client.describe_instances()
-
+other_manager_ip = None
 # Iterate over reservations and instances to find the matching instance
 for reservation in response['Reservations']:
     for instance in reservation['Instances']:

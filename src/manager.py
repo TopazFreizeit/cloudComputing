@@ -3,7 +3,7 @@ import json
 from pydantic import BaseModel
 import logging
 import requests
-from task import Task
+from dtos import Task
 import boto3
 import configuration
 from task_result import TaskResult

@@ -8,7 +8,7 @@ import threading
 from manager import Manager, workerInsideManager
 import configuration
 from task_result import TaskResult
-import custom_logger
+import my_utils
 import time
 import boto3
 app = FastAPI()
@@ -23,7 +23,7 @@ else:
 # Retrieve all instances
 client = boto3.client('ec2','us-east-1')
 response = client.describe_instances()
-other_manager_ip = None
+other_manager_ip = ""
 # Iterate over reservations and instances to find the matching instance
 for reservation in response['Reservations']:
     for instance in reservation['Instances']:

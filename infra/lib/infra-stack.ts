@@ -12,24 +12,34 @@ export class InfraStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    // 👇 import default VPC
+    // import default VPC
     const vpc = ec2.Vpc.fromLookup(this, "my-default-vpc", {
       isDefault: true,
     });
 
-    // 👇 create a security group for the EC2 instance
-    const webserverSG = new ec2.SecurityGroup(this, "webserver-sg-number-one", {
-      vpc: vpc,
-      securityGroupName: "webserver-sg-number-one",
-    });
+    // create a security group for the EC2 instance
+    const webserver_and_redis_SG = new ec2.SecurityGroup(
+      this,
+      "webserver-sg-number-one",
+      {
+        vpc: vpc,
+        securityGroupName: "webserver-sg-number-one",
+      }
+    );
 
-    webserverSG.addIngressRule(
+    webserver_and_redis_SG.addIngressRule(
       ec2.Peer.anyIpv4(),
-      ec2.Port.tcp(80),
+      ec2.Port.tcp(6379),
+      "allow 6379 traffic from anywhere"
+    );
+
+    webserver_and_redis_SG.addIngressRule(
+      ec2.Peer.anyIpv4(),
+      ec2.Port.tcp(8080),
       "allow HTTP traffic from anywhere"
     );
 
-    // IAM role that allows access to S3
+    // IAM role that allow full access to EC2
     const role = new Role(this, "InstanceRole", {
       assumedBy: new ServicePrincipal("ec2.amazonaws.com"),
     });
@@ -38,12 +48,12 @@ export class InfraStack extends cdk.Stack {
       iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonEC2FullAccess")
     );
 
-    const ec2Instance_1 = new ec2.Instance(this, "ec2-instance-1", {
+    const ec2Instance_1 = new ec2.Instance(this, "endpoint-instance-1", {
       vpc: vpc,
       vpcSubnets: {
         subnetType: ec2.SubnetType.PUBLIC,
       },
-      securityGroup: webserverSG,
+      securityGroup: webserver_and_redis_SG,
       instanceType: ec2.InstanceType.of(
         ec2.InstanceClass.T2,
         ec2.InstanceSize.MICRO
@@ -55,12 +65,12 @@ export class InfraStack extends cdk.Stack {
       role: role,
     });
 
-    const ec2Instance_2 = new ec2.Instance(this, "ec2-instance-2", {
+    const ec2Instance_2 = new ec2.Instance(this, "endpoint-instance-2", {
       vpc: vpc,
       vpcSubnets: {
         subnetType: ec2.SubnetType.PUBLIC,
       },
-      securityGroup: webserverSG,
+      securityGroup: webserver_and_redis_SG,
       instanceType: ec2.InstanceType.of(
         ec2.InstanceClass.T2,
         ec2.InstanceSize.MICRO
@@ -72,46 +82,51 @@ export class InfraStack extends cdk.Stack {
       role: role,
     });
 
-    // user data script of 1
-    ec2Instance_1.addUserData("yum update -y");
-    ec2Instance_1.addUserData("yum install -y git");
-    ec2Instance_1.addUserData("yum install -y python3");
-    ec2Instance_1.addUserData("yum install -y python3-pip");
-    ec2Instance_1.addUserData('pip3 install "uvicorn[standard]" fastapi boto3');
-    ec2Instance_1.addUserData(
-      "git clone https://github.com/TopazFreizeit/cloudComputing.git"
-    );
-    ec2Instance_1.addUserData("cd src");
-    ec2Instance_1.addUserData("cd cd cloudComputing");
-    ec2Instance_1.addUserData(
-      `export MY_NUM=1`
-    );
-    ec2Instance_1.addUserData(
-      "uvicorn main_manager:app --host 0.0.0.0 --port 80"
-    );
+    const ec2Instance_redis = new ec2.Instance(this, "redis-instance", {
+      vpc: vpc,
+      vpcSubnets: {
+        subnetType: ec2.SubnetType.PUBLIC,
+      },
+      securityGroup: webserver_and_redis_SG,
+      instanceType: ec2.InstanceType.of(
+        ec2.InstanceClass.T2,
+        ec2.InstanceSize.MICRO
+      ),
+      machineImage: new ec2.AmazonLinuxImage({
+        generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
+      }),
+      userData: ec2.UserData.forLinux({ shebang: "#!/bin/bash" }),
+      role: role,
+    });
+
+    const redisInstanceUserData = `
+      yum update -y
+      yum install docker -y
+      service docker start
+      usermod -a -G docker ec2-user
+      docker pull redis
+      docker run -d -p 6379:6379 --name redis-container redis
+     `;
+
+    ec2Instance_redis.addUserData(redisInstanceUserData);
+
+    const ec2InstanceUserData = `
+      yum update -y
+      yum install -y git
+      yum install -y python3
+      yum install -y python3-pip
+      pip3 install "uvicorn[standard]" fastapi boto3 redis
+      cd src
+      cd cloudComputing
+      uvicorn main_facade:app --host 0.0.0.0 --port 8080
+     `;
+
+    ec2Instance_1.addUserData(ec2InstanceUserData);
+    ec2Instance_2.addUserData(ec2InstanceUserData);
 
     new cdk.CfnOutput(this, "InstanceOnePublicIp", {
       value: ec2Instance_1.instancePublicIp,
     });
-
-    // 👇  user data script
-    // Install Python and dependencies
-    ec2Instance_2.addUserData("yum update -y");
-    ec2Instance_2.addUserData("yum install -y git");
-    ec2Instance_2.addUserData("yum install -y python3");
-    ec2Instance_2.addUserData("yum install -y python3-pip");
-    ec2Instance_2.addUserData('pip3 install "uvicorn[standard]" fastapi boto3');
-    ec2Instance_2.addUserData(
-      "git clone https://github.com/TopazFreizeit/cloudComputing.git"
-    );
-    ec2Instance_2.addUserData("cd src");
-    ec2Instance_2.addUserData("cd cd cloudComputing");
-    ec2Instance_2.addUserData(
-      `export MY_NUM=2`
-    );
-    ec2Instance_2.addUserData(
-      "uvicorn main_manager:app --host 0.0.0.0 --port 80"
-    );
 
     new cdk.CfnOutput(this, "InstanceTwoPublicIp", {
       value: ec2Instance_2.instancePublicIp,

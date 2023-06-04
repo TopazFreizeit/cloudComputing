@@ -1,11 +1,11 @@
 import os
 from fastapi import FastAPI
-from task import Task
+from dtos import Task
 from worker import Worker
 import configuration
 import threading
 import logging
-import custom_logger
+import my_utils
 
 manager_ip_1 = os.getenv('MANAGER_NODE_IP_1')
 if manager_ip_1 is None:

@@ -3,3 +3,4 @@ venv/
 *.pyc
 src/*.db
 src/my_database.db
+src/app.log

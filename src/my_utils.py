@@ -18,12 +18,13 @@ file_handler.setFormatter(formatter)
 # Get the root logger
 root_logger = logging.getLogger()
 root_logger.addHandler(file_handler)
+# Create a Boto3 EC2 client
+ec2_client = boto3.client('ec2', region_name='us-east-1')
+ec2_resource = boto3.resource('ec2',region_name="us-east-1")
 
 # Get Public IP
 def get_redis_public_ip():
     instance_name = 'InfraStack/redis-instance'
-    # Create a Boto3 EC2 client
-    ec2_client = boto3.client('ec2', region_name='us-east-1')
 
     # Describe instances with the specified name tag
     response = ec2_client.describe_instances(
@@ -59,3 +60,68 @@ if redis_public_ip is None or my_ip is None:
     raise RuntimeError("Dont public ip of redis or myself!")
 
 my_redis = redis.Redis(host=redis_public_ip, port=6379, db=0)
+
+def kill_myself():
+    logging.info("want to kill my self")
+    # Get the token
+    token_url = "http://169.254.169.254/latest/api/token"
+    token_ttl = "21600"
+
+    token_headers = {
+        "X-aws-ec2-metadata-token-ttl-seconds": token_ttl
+    }
+
+    response = requests.put(token_url, headers=token_headers)
+    token = response.text.strip()
+    logging.info(f"token is {token}")
+
+    if response.status_code == 200:
+        # Fetch metadata using the token
+        metadata_url = "http://169.254.169.254/latest/meta-data/instance-id"
+        metadata_headers = {
+            "X-aws-ec2-metadata-token": token
+        }
+
+        metadata_response = requests.get(metadata_url, headers=metadata_headers)
+        instance_id = metadata_response.text
+        logging.info(f"instance_id is {instance_id}")
+
+        if metadata_response.status_code == 200:
+            response = ec2_client.terminate_instances(InstanceIds=[instance_id])
+            logging.info(f"just killed myself and got the response {response}")
+        else:
+            logging.error(f"Metadata request failed with status code {metadata_response.status_code}")
+    else:
+        logging.error(f"Token request failed with status code {response.status_code}")
+
+def create_new_ec2_instance_worker():
+    logging.info(f'want to create new instance worker')
+    security_group = list(ec2_resource.security_groups.filter(Filters=[{'Name': 'group-name', 'Values': ['webserver-and-redis-SG']}]))[0] # type: ignore
+    logging.info(f'security group to add is: {security_group}')
+    instance = ec2_resource.create_instances( # type: ignore
+        ImageId='ami-0715c1897453cabd1',
+        InstanceType='t2.micro',
+        MinCount=1,
+        MaxCount=1,
+        UserData="""#!/bin/bash
+            yum update -y
+            yum install -y git
+            yum install -y python3
+            yum install -y python3-pip
+            pip3 install "uvicorn[standard]" fastapi boto3 redis
+            git clone https://github.com/TopazFreizeit/cloudComputing.git
+            cd cloudComputing
+            cd src
+            python3 worker.py
+        """,
+        SecurityGroups=[security_group.group_name],
+    )
+    # Wait for the instance to be running
+    logging.info('wait for instance to start running')
+    instance[0].wait_until_running()
+
+    # Get the public IP address of the new instance
+    public_ip = ec2_resource.Instance(instance[0].id).public_ip_address # type: ignore
+
+    logging.info(f'Instance created successfully with ID: {instance[0].id}')
+    logging.info(f'Public IP address: {public_ip}')

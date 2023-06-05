@@ -5,28 +5,26 @@ from consts import WORKER_NODE_SET
 from dtos import Task, TaskResult
 import hashlib
 import threading
-import requests
 import logging
 import my_utils
+from worker import Worker
 
-class Worker:
-    def __init__(self, last_work_time:float, busy:bool, continue_to_work: bool):
-        self.last_work_time = last_work_time
-        self.busy = busy
-        self.continue_to_work = continue_to_work
+class AutoScaler:
+    def get_all_worker_nodes(self):
+        workers = my_utils.my_redis.smembers(WORKER_NODE_SET)
+        logging.info(f"found {len(workers)} workers")
+        all_workers_as_objects = []
+        return all_workers_as_objects
         
-    def check_if_idle(self):
-        while self.continue_to_work:
+    def check_if_need_to_add_more_worker(self):
+        while True:
             time.sleep(30)
-            elapsed_time = time.time() - self.last_work_time
-            logging.info(f'elapsed time is {elapsed_time}')
-            if not self.busy and elapsed_time >= 30: # 5 minutes (300 seconds)
-                self.continue_to_work=False
-                logging.warning(f'i have not been busy a long time i need remove myself from {WORKER_NODE_SET} set')
-                my_utils.my_redis.srem(WORKER_NODE_SET, my_utils.my_ip)
-                time.sleep(5) # wait some time before termination
-                logging.warning('i have not been busy a long time i need to kill myself')
-                my_utils.kill_myself()
+            workers = self.get_all_worker_nodes()
+            for worker in workers:
+                elapsed_time = time.time() - worker.last_work_time
+                logging.info(f'elapsed time for worker with ip {worker.ip} is {elapsed_time}')
+                if not self.busy and elapsed_time >= 30: # 5 minutes (300 seconds)
+                    logging.warning('i have not beed busy a long time i need to scale in')
 
     
     
@@ -55,7 +53,7 @@ class Worker:
             return result
     
     def do_work(self):
-        while self.continue_to_work:
+        while True:
             time.sleep(5)
             self.busy = True
             self.work()
@@ -64,10 +62,10 @@ class Worker:
 
     
 if __name__ == "__main__":
-    worker = Worker(time.time(), False, True)
+    worker = Worker(my_utils.my_ip)
     worker_str = json.dumps(worker.__dict__)
     logging.info(f"worker started\n{worker_str}")
-    my_utils.my_redis.sadd(WORKER_NODE_SET, my_utils.my_ip)
+    my_utils.my_redis.sadd(WORKER_NODE_SET, worker_str)
     logging.info(f"put worker on redis set")
     thread1 = threading.Thread(target=worker.do_work)
     thread2 = threading.Thread(target=worker.check_if_idle)

@@ -20,10 +20,10 @@ export class InfraStack extends cdk.Stack {
     // create a security group for the EC2 instance
     const webserver_and_redis_SG = new ec2.SecurityGroup(
       this,
-      "webserver-sg-number-one",
+      "webserver-and-redis-SG",
       {
         vpc: vpc,
-        securityGroupName: "webserver-sg-number-one",
+        securityGroupName: "webserver-and-redis-SG",
       }
     );
 
@@ -99,6 +99,23 @@ export class InfraStack extends cdk.Stack {
       role: role,
     });
 
+    const ec2Instance_worker = new ec2.Instance(this, "worker-instance", {
+      vpc: vpc,
+      vpcSubnets: {
+        subnetType: ec2.SubnetType.PUBLIC,
+      },
+      securityGroup: webserver_and_redis_SG,
+      instanceType: ec2.InstanceType.of(
+        ec2.InstanceClass.T2,
+        ec2.InstanceSize.MICRO
+      ),
+      machineImage: new ec2.AmazonLinuxImage({
+        generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
+      }),
+      userData: ec2.UserData.forLinux({ shebang: "#!/bin/bash" }),
+      role: role,
+    });
+
     const redisInstanceUserData = `
       yum update -y
       yum install docker -y
@@ -116,13 +133,29 @@ export class InfraStack extends cdk.Stack {
       yum install -y python3
       yum install -y python3-pip
       pip3 install "uvicorn[standard]" fastapi boto3 redis
-      cd src
+      git clone https://github.com/TopazFreizeit/cloudComputing.git
       cd cloudComputing
+      cd src
       uvicorn main_facade:app --host 0.0.0.0 --port 8080
      `;
 
     ec2Instance_1.addUserData(ec2InstanceUserData);
     ec2Instance_2.addUserData(ec2InstanceUserData);
+
+    const ec2InstanceWorkerUserData = `
+      #!/bin/bash
+      yum update -y
+      yum install -y git
+      yum install -y python3
+      yum install -y python3-pip
+      pip3 install "uvicorn[standard]" fastapi boto3 redis
+      git clone https://github.com/TopazFreizeit/cloudComputing.git
+      cd cloudComputing
+      cd src
+      python3 worker.py
+     `;
+
+    ec2Instance_worker.addUserData(ec2InstanceWorkerUserData);
 
     new cdk.CfnOutput(this, "InstanceOnePublicIp", {
       value: ec2Instance_1.instancePublicIp,

@@ -5,17 +5,12 @@ import logging
 import my_utils
 import json
 import time
+import consts
+import spawn_worker
 
 from dtos import Task, TaskResult
 
-
 app = FastAPI()
-
-# TODO
-# in a different thread make the up scaling happen
-# create a new lock for the spawn of a new worker
-# if lock do not exist (my_utils.my_redis.get("lock")) create new string named lock and make it value to 1 
-# my_utils.my_redis.set("lock","1")
 
 
 @app.put("/enqueue")
@@ -25,7 +20,7 @@ def enqueue(iterations: int = Query(..., description="number of iterations", gt=
     new_task = Task(work_id, base64.b64encode(buffer).decode('utf-8'), iterations, timestamp=time.time())
     json_str = json.dumps(new_task.__dict__)
     logging.info(f'recieved new task\n{json_str}')
-    my_utils.my_redis.lpush('new-tasks-list', json_str)
+    my_utils.my_redis.rpush(consts.TASK_LIST, json_str)
     logging.info(f'set task in redis')
     return work_id
 

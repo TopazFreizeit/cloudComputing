@@ -140,7 +140,11 @@ export class InfraStack extends cdk.Stack {
       yum install -y git
       yum install -y python3
       yum install -y python3-pip
-      pip3 install "uvicorn[standard]" fastapi boto3 redis requests
+      pip3 install boto3
+      pip3 install redis
+      pip3 install fastapi
+      pip3 install requests
+      pip3 install "uvicorn[standard]"
       git clone https://github.com/TopazFreizeit/cloudComputing.git
       cd cloudComputing
       cd src

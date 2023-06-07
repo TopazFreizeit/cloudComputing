@@ -2,6 +2,7 @@ import logging
 import boto3
 import requests
 import redis
+import time
 
 # Logger
 # Configure the logging module
@@ -60,6 +61,17 @@ if redis_public_ip is None or my_ip is None:
     raise RuntimeError("Dont public ip of redis or myself!")
 
 my_redis = redis.Redis(host=redis_public_ip, port=6379, db=0)
+
+## wait for redis connection
+ok = False
+while not ok:
+    try:
+        my_redis.get("ddnkjn")
+        ok = True
+        logging.info("have connection with Redis")
+    except Exception:
+        logging.warn("do not have connection with Redis")
+        time.sleep(10)
 
 def kill_myself():
     logging.info("want to kill my self")

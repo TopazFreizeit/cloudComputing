@@ -8,6 +8,7 @@ import threading
 import requests
 import logging
 import my_utils
+import consts
 
 # TODO update "num of worker"
 
@@ -28,6 +29,11 @@ class Worker:
                 my_utils.my_redis.srem(WORKER_NODE_SET, my_utils.my_ip)
                 time.sleep(5) # wait some time before termination
                 logging.warning('i have not been busy a long time i need to kill myself')
+                num_of_worker = my_utils.my_redis.get(consts.NUM_OF_WORKERS)
+                logging.info(f'num_of_worker {num_of_worker}')
+                if not num_of_worker is None:
+                    num_of_worker = int(num_of_worker)
+                    my_utils.my_redis.set(consts.NUM_OF_WORKERS,str(num_of_worker - 1))
                 my_utils.kill_myself()
 
     

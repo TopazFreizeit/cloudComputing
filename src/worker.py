@@ -9,6 +9,8 @@ import requests
 import logging
 import my_utils
 
+# TODO update "num of worker"
+
 class Worker:
     def __init__(self, last_work_time:float, busy:bool, continue_to_work: bool):
         self.last_work_time = last_work_time
@@ -36,7 +38,7 @@ class Worker:
             return
         else: 
             stored_obj = json.loads(stored_json)
-            task = Task(stored_obj['id'], stored_obj['buffer'], int(stored_obj['iterations']))
+            task = Task(stored_obj['id'], stored_obj['buffer'], int(stored_obj['iterations']), float(stored_obj['timestamp']))
             logging.info(f'from redis recieved new task\n{json.dumps(task.__dict__)}')
             buffer = base64.b64decode(task.buffer.encode('utf-8'))
             output = hashlib.sha512(buffer).digest()

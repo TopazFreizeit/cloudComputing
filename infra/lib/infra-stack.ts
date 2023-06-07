@@ -142,20 +142,20 @@ export class InfraStack extends cdk.Stack {
     ec2Instance_1.addUserData(ec2InstanceUserData);
     ec2Instance_2.addUserData(ec2InstanceUserData);
 
-    const ec2InstanceWorkerUserData = `
-      #!/bin/bash
-      yum update -y
-      yum install -y git
-      yum install -y python3
-      yum install -y python3-pip
-      pip3 install "uvicorn[standard]" fastapi boto3 redis
-      git clone https://github.com/TopazFreizeit/cloudComputing.git
-      cd cloudComputing
-      cd src
-      python3 worker.py
-     `;
+    // const ec2InstanceWorkerUserData = `
+    //   #!/bin/bash
+    //   yum update -y
+    //   yum install -y git
+    //   yum install -y python3
+    //   yum install -y python3-pip
+    //   pip3 install "uvicorn[standard]" fastapi boto3 redis
+    //   git clone https://github.com/TopazFreizeit/cloudComputing.git
+    //   cd cloudComputing
+    //   cd src
+    //   python3 worker.py
+    //  `;
 
-    ec2Instance_worker.addUserData(ec2InstanceWorkerUserData);
+    // ec2Instance_worker.addUserData(ec2InstanceWorkerUserData);
 
     new cdk.CfnOutput(this, "InstanceOnePublicIp", {
       value: ec2Instance_1.instancePublicIp,

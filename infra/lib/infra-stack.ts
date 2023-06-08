@@ -124,18 +124,6 @@ export class InfraStack extends cdk.Stack {
       docker pull redis
       docker run -d -p 6379:6379 --name redis-container redis
       docker run --name redis-commander -p 8080:8081 -e REDIS_HOSTS=localhost:6379 rediscommander/redis-commander
-      yum install -y git
-      yum install -y python3
-      yum install -y python3-pip
-      pip3 install urllib3==1.26.6  boto3
-      pip3 install redis
-      pip3 install fastapi
-      pip3 install requests
-      pip3 install "uvicorn[standard]"
-      git clone https://github.com/TopazFreizeit/cloudComputing.git
-      cd cloudComputing
-      cd src
-      python3 init_redis.py
      `;
 
     ec2Instance_redis.addUserData(redisInstanceUserData);

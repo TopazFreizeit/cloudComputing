@@ -39,6 +39,7 @@ class Worker:
     
     
     def work(self):
+        logging.info(f'inside work function')
         stored_json = my_utils.my_redis.rpop(consts.TASK_LIST)
         if stored_json is None:
             return

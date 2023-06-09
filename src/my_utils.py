@@ -53,16 +53,33 @@ def get_my_public_ip():
     my_ip = response.json()['ip']
     return my_ip
 
+<<<<<<< HEAD
 def get_instance_iam_role_arn1():
     metadata_url = 'http://169.254.169.254/latest/meta-data/iam/info'
     response = requests.get(metadata_url)
+=======
+def get_instance_iam_role_arn():
+    # Specify the name of your IAM role
+    role_name = 'InstanceRole'
+
+    # Create a Boto3 client for IAM
+    iam_client = boto3.client('iam')
+
+    # Retrieve the IAM role
+    response = iam_client.get_role(RoleName=role_name)
+    role_arn = response['Role']['Arn']
+
+    return role_arn
+    # metadata_url = 'http://169.254.169.254/latest/meta-data/iam/info'
+    # response = requests.get(metadata_url)
+>>>>>>> ebd2c45ef56cc6bb1808b619214de9f813a972ad
     
-    if response.status_code == 200:
-        metadata = response.json()
-        iam_role_arn = metadata['InstanceProfileArn']
-        return iam_role_arn
-    else:
-        return None
+    # if response.status_code == 200:
+    #     metadata = response.json()
+    #     iam_role_arn = metadata['InstanceProfileArn']
+    #     return iam_role_arn
+    # else:
+    #     return None
 
 
 def get_instance_iam_role_arn(role_id):

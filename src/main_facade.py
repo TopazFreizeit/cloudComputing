@@ -21,6 +21,7 @@ def run_spawn_worker():
 async def startup_event():
     run_spawn_worker()
 
+
 @app.put("/enqueue")
 def enqueue(iterations: int = Query(..., description="number of iterations", gt=0), buffer: bytes = Body(...)) -> str:
     logging.info(f'inside enqueue endpoint.')
@@ -33,7 +34,7 @@ def enqueue(iterations: int = Query(..., description="number of iterations", gt=
     return work_id
 
 @app.post("/pullCompleted")
-async def exit(top: int = Query(..., description="number of getting the completed tasks", gt=1)):
+async def exit(top: int = Query(..., description="number of getting the completed tasks", gt=0)):
     elements = my_utils.my_redis.lpop('result-tasks-list', top)
     logging.info(f"inside pull completed endpoint got {len(elements)} elemnts")
     all_str = []

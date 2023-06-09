@@ -36,7 +36,7 @@ def spawn_new_workers():
         more_than_15_sec = check_if_more_than_15sec_from_last_task()
         num_of_workers = my_utils.my_redis.get(consts.NUM_OF_WORKERS)
         logging.info(f"num_of_workers {num_of_workers}")
-        if not num_of_workers:
+        if num_of_workers is None:
             num_of_workers = 0
         num_of_workers = int(num_of_workers)
         if more_than_15_sec and acquire_lock(consts.LOCK) and num_of_workers < 5:

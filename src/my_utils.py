@@ -1,3 +1,4 @@
+import base64
 import logging
 import boto3
 import requests
@@ -110,22 +111,27 @@ def create_new_ec2_instance_worker():
     logging.info(f'want to create new instance worker')
     security_group = list(ec2_resource.security_groups.filter(Filters=[{'Name': 'group-name', 'Values': ['webserver-and-redis-SG']}]))[0] # type: ignore
     logging.info(f'security group to add is: {security_group}')
+    user_data="#!/bin/bash\n"
+    user_data = user_data + """yum update -y
+    yum install -y git
+    yum install -y python3
+    yum install -y python3-pip
+    pip3 install urllib3==1.26.6  boto3
+    pip3 install redis
+    pip3 install fastapi
+    pip3 install requests
+    pip3 install "uvicorn[standard]"
+    git clone https://github.com/TopazFreizeit/cloudComputing.git
+    cd cloudComputing
+    cd src
+    python3 worker.py
+    """
     instance = ec2_resource.create_instances( # type: ignore
         ImageId='ami-0715c1897453cabd1',
         InstanceType='t2.micro',
         MinCount=1,
         MaxCount=1,
-        UserData="""#!/bin/bash
-            yum update -y
-            yum install -y git
-            yum install -y python3
-            yum install -y python3-pip
-            pip3 install "uvicorn[standard]" fastapi boto3 redis
-            git clone https://github.com/TopazFreizeit/cloudComputing.git
-            cd cloudComputing
-            cd src
-            python3 worker.py
-        """,
+        UserData=user_data,
         SecurityGroups=[security_group.group_name],
     )
     # Wait for the instance to be running
@@ -134,6 +140,14 @@ def create_new_ec2_instance_worker():
 
     # Get the public IP address of the new instance
     public_ip = ec2_resource.Instance(instance[0].id).public_ip_address # type: ignore
-
-    logging.info(f'Instance created successfully with ID: {instance[0].id}')
+    
+    # Specify the instance ID
+    instance_id = instance[0].id
+    logging.info(f'Instance created successfully with ID: {instance_id}')
     logging.info(f'Public IP address: {public_ip}')
+    
+    # Wait for the instance to pass both status checks
+    waiter = ec2_client.get_waiter('instance_status_ok')
+    waiter.wait(InstanceIds=[instance_id])
+
+    logging.info(f"Instance {instance_id} passed all health checks.")

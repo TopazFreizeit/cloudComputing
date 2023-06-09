@@ -6,12 +6,20 @@ import my_utils
 import json
 import time
 import consts
-import spawn_worker
-
+from spawn_worker import *
+import threading
 from dtos import Task, TaskResult
 
 app = FastAPI()
+def run_spawn_worker():
+    logging.info(f"spawn_worker started!!")
+    thread1 = threading.Thread(target=spawn_new_workers)
+    thread1.start()
+    thread1.join()
 
+@app.on_event("startup")
+async def startup_event():
+    run_spawn_worker()
 
 @app.put("/enqueue")
 def enqueue(iterations: int = Query(..., description="number of iterations", gt=0), buffer: bytes = Body(...)) -> str:
@@ -37,4 +45,3 @@ async def exit(top: int = Query(..., description="number of getting the complete
         all_str.append(retrieved_obj)
     return all_str
 
-spawn_worker.main()

@@ -43,13 +43,14 @@ def spawn_new_workers():
             my_utils.my_redis.set(consts.NUM_OF_WORKERS, str(num_of_workers + 1))
         release_lock(consts.LOCK)
 
-def main():
-    logging.info(f"spawn_worker started!!")
-    thread1 = threading.Thread(target=spawn_new_workers)
-    thread1.start()
-    thread1.join()
+# if __name__ == "__main__":
+#     logging.info(f"spawn_worker started!!")
+#     thread1 = threading.Thread(target=spawn_new_workers)
+#     thread1.start()
+#     thread1.join()
 
-
-if __name__ == "__main__":
-    
-    main()
+# def run_spawn_worker():
+#     logging.info(f"spawn_worker started!!")
+#     thread1 = threading.Thread(target=spawn_new_workers)
+#     thread1.start()
+#     thread1.join()

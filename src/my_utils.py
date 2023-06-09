@@ -151,3 +151,4 @@ def create_new_ec2_instance_worker():
     waiter.wait(InstanceIds=[instance_id])
 
     logging.info(f"Instance {instance_id} passed all health checks.")
+    time.sleep(60)

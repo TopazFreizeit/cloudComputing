@@ -36,3 +36,5 @@ async def exit(top: int = Query(..., description="number of getting the complete
         logging.info(f"got this element {result_str}")
         all_str.append(retrieved_obj)
     return all_str
+
+spawn_worker.main()

@@ -53,6 +53,18 @@ def get_my_public_ip():
     my_ip = response.json()['ip']
     return my_ip
 
+def get_instance_iam_role_arn():
+    metadata_url = 'http://169.254.169.254/latest/meta-data/iam/info'
+    response = requests.get(metadata_url)
+    
+    if response.status_code == 200:
+        metadata = response.json()
+        iam_role_arn = metadata['InstanceProfileArn']
+        return iam_role_arn
+    else:
+        return None
+
+
 redis_public_ip = get_redis_public_ip()
 my_ip = get_my_public_ip()
 logging.info(f'redis public ip {redis_public_ip}, my ip {my_ip}')
@@ -108,6 +120,8 @@ def kill_myself():
         logging.error(f"Token request failed with status code {response.status_code}")
 
 def create_new_ec2_instance_worker():
+    arn = get_instance_iam_role_arn()
+    role_id = 'InstanceRole'
     logging.info(f'want to create new instance worker')
     security_group = list(ec2_resource.security_groups.filter(Filters=[{'Name': 'group-name', 'Values': ['webserver-and-redis-SG']}]))[0] # type: ignore
     logging.info(f'security group to add is: {security_group}')
@@ -133,6 +147,9 @@ def create_new_ec2_instance_worker():
         MaxCount=1,
         UserData=user_data,
         SecurityGroups=[security_group.group_name],
+        IamInstanceProfile={
+            'Arn': f'arn:aws:iam::{arn}:instance-profile/{role_id}'
+        }
     )
     # Wait for the instance to be running
     logging.info('wait for instance to start running')
@@ -152,3 +169,5 @@ def create_new_ec2_instance_worker():
 
     logging.info(f"Instance {instance_id} passed all health checks.")
     time.sleep(60)
+
+

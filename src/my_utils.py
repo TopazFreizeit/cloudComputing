@@ -54,15 +54,26 @@ def get_my_public_ip():
     return my_ip
 
 def get_instance_iam_role_arn():
-    metadata_url = 'http://169.254.169.254/latest/meta-data/iam/info'
-    response = requests.get(metadata_url)
+    # Specify the name of your IAM role
+    role_name = 'InstanceRole'
+
+    # Create a Boto3 client for IAM
+    iam_client = boto3.client('iam')
+
+    # Retrieve the IAM role
+    response = iam_client.get_role(RoleName=role_name)
+    role_arn = response['Role']['Arn']
+
+    return role_arn
+    # metadata_url = 'http://169.254.169.254/latest/meta-data/iam/info'
+    # response = requests.get(metadata_url)
     
-    if response.status_code == 200:
-        metadata = response.json()
-        iam_role_arn = metadata['InstanceProfileArn']
-        return iam_role_arn
-    else:
-        return None
+    # if response.status_code == 200:
+    #     metadata = response.json()
+    #     iam_role_arn = metadata['InstanceProfileArn']
+    #     return iam_role_arn
+    # else:
+    #     return None
 
 
 redis_public_ip = get_redis_public_ip()
@@ -121,6 +132,7 @@ def kill_myself():
 
 def create_new_ec2_instance_worker():
     arn = get_instance_iam_role_arn()
+    logging.info(f'ARM is: {arn}')
     role_id = 'InstanceRole'
     logging.info(f'want to create new instance worker')
     security_group = list(ec2_resource.security_groups.filter(Filters=[{'Name': 'group-name', 'Values': ['webserver-and-redis-SG']}]))[0] # type: ignore

@@ -15,7 +15,7 @@ def run_spawn_worker():
     logging.info(f"spawn_worker started!!")
     thread1 = threading.Thread(target=spawn_new_workers)
     thread1.start()
-    thread1.join()
+#    thread1.join()
 
 @app.on_event("startup")
 async def startup_event():

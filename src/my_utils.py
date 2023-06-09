@@ -54,27 +54,14 @@ def get_my_public_ip():
     return my_ip
 
 
-def get_instance_iam_role_arn1():
-    metadata_url = 'http://169.254.169.254/latest/meta-data/iam/info'
-    response = requests.get(metadata_url)
-    if response.status_code == 200:
-        metadata = response.json()
-        iam_role_arn = metadata['InstanceProfileArn']
-        return iam_role_arn
-    else:
-        return None
 
-
-def get_instance_iam_role_arn(role_id):
-    idrole = 'InstanceRole'
-    # Create a Boto3 client for IAM
-    iam_client = boto3.client('iam')
-
-    # Retrieve the IAM role
-    response = iam_client.get_role(RoleId=role_id)
-    role_arn = response['Role']['Arn']
-
-    return role_arn
+def get_instance_iam_role_arn():
+    logging.info(f'inside get_instance_iam_role_arn')
+    response = ec2_client.describe_instances(InstanceIds=['self'])
+    instance_id = response['Reservations'][0]['Instances'][0]['InstanceId']
+    response = ec2_client.describe_instances(InstanceIds=[instance_id])
+    instance_profile_arn = response['Reservations'][0]['Instances'][0]['IamInstanceProfile']['Arn']
+    return instance_profile_arn
 
 
 redis_public_ip = get_redis_public_ip()
@@ -132,10 +119,9 @@ def kill_myself():
         logging.error(f"Token request failed with status code {response.status_code}")
 
 def create_new_ec2_instance_worker():
+    logging.info(f'inside create_new_ec2_instance_worker')
     arn = get_instance_iam_role_arn()
-    arn2 = get_instance_iam_role_arn1()
     logging.info(f'arn from boto3:{arn}')
-    logging.info(f'arn from http request:{arn2}')
     role_id = 'InstanceRole'
     logging.info(f'want to create new instance worker')
     security_group = list(ec2_resource.security_groups.filter(Filters=[{'Name': 'group-name', 'Values': ['webserver-and-redis-SG']}]))[0] # type: ignore

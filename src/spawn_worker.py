@@ -24,6 +24,7 @@ def check_if_more_than_15sec_from_last_task():
 
 def acquire_lock(lock_key):
     acquired = my_utils.my_redis.set(lock_key, 'locked', nx=True)
+    logging.info(f'inside acquire_lock returning :{acquired}')
     return acquired
 
 def release_lock(lock_key):
@@ -39,6 +40,7 @@ def spawn_new_workers():
             num_of_workers = 0
         num_of_workers = int(num_of_workers)
         if more_than_15_sec and acquire_lock(consts.LOCK) and num_of_workers < 5:
+            logging.info(f'inside spawn_new_workers if statement')
             my_utils.create_new_ec2_instance_worker()
             my_utils.my_redis.set(consts.NUM_OF_WORKERS, str(num_of_workers + 1))
         release_lock(consts.LOCK)

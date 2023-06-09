@@ -53,13 +53,15 @@ def get_my_public_ip():
     my_ip = response.json()['ip']
     return my_ip
 
-
+def get_current_instance_id():
+    response = requests.get('http://169.254.169.254/latest/meta-data/instance-id')
+    instance_id = response.text
+    return instance_id
 
 def get_instance_iam_role_arn():
     logging.info(f'inside get_instance_iam_role_arn')
-    response = ec2_client.describe_instances(InstanceIds=['self'])
-    instance_id = response['Reservations'][0]['Instances'][0]['InstanceId']
-    response = ec2_client.describe_instances(InstanceIds=[instance_id])
+    my_id = get_current_instance_id()
+    response = ec2_client.describe_instances(InstanceIds=[my_id])
     instance_profile_arn = response['Reservations'][0]['Instances'][0]['IamInstanceProfile']['Arn']
     return instance_profile_arn
 
@@ -122,7 +124,6 @@ def create_new_ec2_instance_worker():
     logging.info(f'inside create_new_ec2_instance_worker')
     arn = get_instance_iam_role_arn()
     logging.info(f'arn from boto3:{arn}')
-    role_id = 'InstanceRole'
     logging.info(f'want to create new instance worker')
     security_group = list(ec2_resource.security_groups.filter(Filters=[{'Name': 'group-name', 'Values': ['webserver-and-redis-SG']}]))[0] # type: ignore
     logging.info(f'security group to add is: {security_group}')
@@ -149,7 +150,7 @@ def create_new_ec2_instance_worker():
         UserData=user_data,
         SecurityGroups=[security_group.group_name],
         IamInstanceProfile={
-            'Arn': f'arn:aws:iam::{arn}:instance-profile/{role_id}'
+            'Arn': f'{arn}'
         }
     )
     # Wait for the instance to be running

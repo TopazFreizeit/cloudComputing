@@ -43,7 +43,7 @@ def spawn_new_workers():
             logging.info(f'inside spawn_new_workers if statement')
             my_utils.create_new_ec2_instance_worker()
             my_utils.my_redis.set(consts.NUM_OF_WORKERS, str(num_of_workers + 1))
-        release_lock(consts.LOCK)
+            release_lock(consts.LOCK)
 
 # if __name__ == "__main__":
 #     logging.info(f"spawn_worker started!!")

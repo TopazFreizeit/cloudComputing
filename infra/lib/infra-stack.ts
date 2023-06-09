@@ -47,6 +47,10 @@ export class InfraStack extends cdk.Stack {
     role.addManagedPolicy(
       iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonEC2FullAccess")
     );
+    
+    role.addManagedPolicy(
+      iam.ManagedPolicy.fromAwsManagedPolicyName("IAMFullAccess")
+    );
 
     const ec2Instance_1 = new ec2.Instance(this, "endpoint-instance-1", {
       vpc: vpc,

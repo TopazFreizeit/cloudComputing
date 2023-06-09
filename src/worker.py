@@ -34,12 +34,12 @@ class Worker:
                 if not num_of_worker is None:
                     num_of_worker = int(num_of_worker)
                     my_utils.my_redis.set(consts.NUM_OF_WORKERS,str(num_of_worker - 1))
-                my_utils.kill_myself()
+                #my_utils.kill_myself()
 
     
     
     def work(self):
-        stored_json = my_utils.my_redis.rpop('new-tasks-list')
+        stored_json = my_utils.my_redis.rpop(consts.TASK_LIST)
         if stored_json is None:
             return
         else: 
@@ -63,6 +63,7 @@ class Worker:
             return result
     
     def do_work(self):
+        logging.info(f"inside do_work loop")
         while self.continue_to_work:
             time.sleep(5)
             self.busy = True
@@ -81,5 +82,5 @@ if __name__ == "__main__":
     thread2 = threading.Thread(target=worker.check_if_idle)
     thread1.start()
     thread2.start()
-    thread1.join()
-    thread2.join()
+    #thread1.join()
+    #thread2.join()

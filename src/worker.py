@@ -58,7 +58,7 @@ class Worker:
             result = TaskResult(id=task.id, output=str_output)
             result_str = json.dumps(result.__dict__)
             logging.info(f'result is\n{result_str}')
-            my_utils.my_redis.lpush('result-tasks-list', result_str)
+            my_utils.my_redis.lpush(consts.RESULT_LIST, result_str)
             logging.info(f'set task in redis')  
             self.last_work_time = time.time()
             return result

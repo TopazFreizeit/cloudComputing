@@ -35,11 +35,12 @@ def enqueue(iterations: int = Query(..., description="number of iterations", gt=
 
 @app.post("/pullCompleted")
 async def exit(top: int = Query(..., description="number of getting the completed tasks", gt=0)):
-    num_of_elements = my_utils.my_redis.llen('result-tasks-list')
+    num_of_elements = my_utils.my_redis.llen(consts.RESULT_LIST)
     if num_of_elements is None or 0:
         return "none"
+    logging.info(f"length of {consts.RESULT_LIST} is {num_of_elements}")
     min_of_elements = min([num_of_elements,top])
-    elements = my_utils.my_redis.lpop('result-tasks-list', min_of_elements)
+    elements = my_utils.my_redis.lpop(consts.RESULT_LIST, min_of_elements)
     logging.info(f"inside pull completed endpoint got {len(elements)} elemnts")
     all_str = []
     if elements is None:

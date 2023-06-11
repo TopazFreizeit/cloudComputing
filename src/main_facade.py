@@ -34,9 +34,9 @@ def enqueue(iterations: int = Query(..., description="number of iterations", gt=
     return work_id
 
 @app.post("/pullCompleted")
-async def exit(top: int = Query(..., description="number of getting the completed tasks", gt=0)):
+def pullCompleted(top: int = Query(..., description="number of getting the completed tasks", gt=0)):
     num_of_elements = my_utils.my_redis.llen(consts.RESULT_LIST)
-    if num_of_elements is None or 0:
+    if num_of_elements == 0:
         return "none"
     logging.info(f"length of {consts.RESULT_LIST} is {num_of_elements}")
     min_of_elements = min([num_of_elements,top])

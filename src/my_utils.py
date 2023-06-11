@@ -164,12 +164,11 @@ def create_new_ec2_instance_worker():
     instance_id = instance[0].id
     logging.info(f'Instance created successfully with ID: {instance_id}')
     logging.info(f'Public IP address: {public_ip}')
-    
+    logging.info(f"wait for instance {instance_id} to pass all health checks.")
     # Wait for the instance to pass both status checks
     waiter = ec2_client.get_waiter('instance_status_ok')
     waiter.wait(InstanceIds=[instance_id])
 
     logging.info(f"Instance {instance_id} passed all health checks.")
-    time.sleep(60)
 
 

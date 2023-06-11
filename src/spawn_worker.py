@@ -42,6 +42,7 @@ def spawn_new_workers():
         if more_than_15_sec and acquire_lock(consts.LOCK) and num_of_workers < 5:
             logging.info(f'inside spawn_new_workers if statement')
             my_utils.create_new_ec2_instance_worker()
+            logging.info(f'set to be num_of_worker {num_of_workers + 1}')
             my_utils.my_redis.set(consts.NUM_OF_WORKERS, str(num_of_workers + 1))
             release_lock(consts.LOCK)
 

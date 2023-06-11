@@ -4,7 +4,7 @@
 
 - You can run the **run.bat** file (for Windows) or **run.sh** file (for mac) in the parent directory _or_ follow the instructions below.
 
-- if you ran the script you'll see the public IP printed to the screen afte the deployment is finished.
+- if you ran the script you'll see the 2 public IP printed to the screen afte the deployment is finished.
 
 ## Instructions
 
@@ -18,7 +18,7 @@
 7. After deployment finished you will see the instance public IP printed to screen:
    - Outputs:
      InfraStack.InstancePublicIp = \<IP\>
-8. Wait until the instance will stop to initialize (approx 5min) and browse to the public IP on port 80.
+8. Wait until the instance will stop to initialize (approx 5min) and browse to the public IP on port **8080**.
 
 ### Notes
 

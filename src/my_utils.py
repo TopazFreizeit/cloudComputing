@@ -24,28 +24,43 @@ root_logger.addHandler(file_handler)
 ec2_client = boto3.client('ec2', region_name='us-east-1')
 ec2_resource = boto3.resource('ec2',region_name="us-east-1")
 
+# Maximum number of retries
+MAX_RETRIES = 10
+
 # Get Public IP
 def get_redis_public_ip():
     instance_name = 'InfraStack/redis-instance'
+    retries = 0
+    
+    while retries < MAX_RETRIES:
+        try:
+            # Describe instances with the specified name tag
+            response = ec2_client.describe_instances(
+                Filters=[
+                    {
+                        'Name': 'tag:Name',
+                        'Values': [instance_name]
+                    }
+                ]
+            )
 
-    # Describe instances with the specified name tag
-    response = ec2_client.describe_instances(
-        Filters=[
-            {
-                'Name': 'tag:Name',
-                'Values': [instance_name]
-            }
-        ]
-    )
+            # Extract the public IP address from the response
+            if 'Reservations' in response:
+                for reservation in response['Reservations']:
+                    for instance in reservation['Instances']:
+                        if 'PublicIpAddress' in instance:
+                            return instance['PublicIpAddress']
 
-    # Extract the public IP address from the response
-    if 'Reservations' in response:
-        for reservation in response['Reservations']:
-            for instance in reservation['Instances']:
-                if 'PublicIpAddress' in instance:
-                    return instance['PublicIpAddress']
+            return None
 
-    return None
+        except Exception:
+            retries += 1
+            ec2_client = boto3.client('ec2', region_name='us-east-1')
+            ec2_resource = boto3.resource('ec2',region_name="us-east-1")
+            logging.warning('No AWS credentials found. Retrying in 5 seconds...')
+            time.sleep(5)
+
+    raise RuntimeError('Unable to retrieve Redis public IP')
 
 
 def get_my_public_ip():

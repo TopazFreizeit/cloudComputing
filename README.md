@@ -15,7 +15,7 @@
 5. If it is the first time you use aws cdk please type "cdk bootstrap"
    - (Deploying stacks with the AWS CDK requires dedicated Amazon S3 buckets and other containers to be available to AWS CloudFormation during deployment)
 6. For deployment please type "cdk deploy".
-7. After deployment finished you will see the instance public IP printed to screen:
+7. After deployment finished you will see the 2 endpoint node instance public IP printed to screen:
    - Outputs:
      InfraStack.InstancePublicIp = \<IP\>
 8. Wait until the instance will stop to initialize (approx 5min) and browse to the public IP on port **8080**.

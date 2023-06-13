@@ -89,7 +89,7 @@ if redis_public_ip is None or my_ip is None:
     logging.error(f'redis public ip {redis_public_ip} or my ip {my_ip} is none')
     raise RuntimeError("Dont public ip of redis or myself!")
 
-my_redis = redis.Redis(host=redis_public_ip, port=6379, db=0)
+my_redis = redis.Redis(host=redis_public_ip, port=6379, db=0, password='ru_cloud_computing_hw2')
 
 ## wait for redis connection
 ok = False

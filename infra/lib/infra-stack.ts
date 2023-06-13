@@ -128,7 +128,7 @@ export class InfraStack extends cdk.Stack {
       usermod -a -G docker ec2-user
       docker pull redis
       echo 'save ""' > redis-custom.conf
-      docker run --name redis-container -p 6379:6379 -d -v $(pwd)/redis-custom.conf:/usr/local/etc/redis/redis.conf redis:5.0.3-alpine redis-server /usr/local/etc/redis/redis.conf
+      docker run --name redis-container -p 6379:6379 -d -v $(pwd)/redis-custom.conf:/usr/local/etc/redis/redis.conf redis:5.0.3-alpine redis-server /usr/local/etc/redis/redis.conf --requirepass ru_cloud_computing_hw2
      `;
 
     ec2Instance_redis.addUserData(redisInstanceUserData);

@@ -126,7 +126,7 @@ export class InfraStack extends cdk.Stack {
       service docker start
       usermod -a -G docker ec2-user
       docker pull redis
-      docker run --name redis-container -p 6379:6379 -d redis:alpine redis-server --save "" --appendonly no --maxmemory-policy volatile-lru
+      docker run --name redis-container -p 6379:6379 -d redis:alpine sh -c "rm -f /data/dump.rdb && redis-server"
      `;
 
     ec2Instance_redis.addUserData(redisInstanceUserData);
